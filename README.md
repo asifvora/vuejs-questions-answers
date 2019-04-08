@@ -138,6 +138,52 @@ List VueJS Questions & Answers
 |129| [What is CSS extraction?](#what-is-css-extraction)|
 |130| [What are custom blocks?](#what-are-custom-blocks)|
 |131| [What are the features of stylelint?](#what-are-the-features-of-stylelint?)|
+|132| [What are the principles for vuex application structure?](#what-are-the-principles-for-vuex-application-structure)|
+|133| [Is Vuex supports hot reloading?](#is-vuex-supports-hot-reloading)|
+|134| [What is the purpose of hotUpdate API of vuex store?](#what-is-the-purpose-of-hotupdate-api-of-vuex-store)|
+|135| [How do you test mutations?](#how-do-you-test-mutations)|
+|136| [How do you test your getters?](#how-do-you-test-your-getters)|
+|137| [What is the procedure to run tests in node?](#what-is-the-procedure-to-run-tests-in-node)|
+|138| [What is the procedure to run tests in browser?](#what-is-the-procedure-to-run-tests-in-browser)|
+|139| [What is the purpose of strict mode in vuex?](#what-is-the-purpose-of-strict-mode-in-vuex)|
+|140| [Can I use strict mode in production environment?](#can-i-use-strict-mode-in-production-environment)|
+|141| [What is vuex plugin?](#what-is-vuex-plugin)|
+|142| [How do you mutate state in plugins?](#how-do-you-mutate-state-in-plugins)|
+|143| [What is vuex store?](#what-is-vuex-store)|
+|144| [What are the differences of vuex store and plain global object?](#what-are-the-differences-of-vuex-store-and-plain-global-object)|
+|145| [What is the reason not to update the state directly?](#what-is-the-reason-not-to-update-the-state-directly)|
+|146| [What is Single state tree?](#what-is-single-state-tree)|
+|147| [How do you install vuex?](#how-do-you-install-vuex)|
+|148| [Do I need promise for vuex?](#do-i-need-promise-for-vuex)|
+|149| [How do you display store state in vue components?](#how-do-you-display-store-state-in-vue-components)|
+|150| [How do you inject store into child components?](#how-do-you-inject-store-into-child-components)|
+|151| [What is mapState helper?](#what-is-mapstate-helper)|
+|152| [How do you combine local computed properties with mapState helper?](#how-do-you-combine-local-computed-properties-with-mapstate-helper)|
+|153| [Do you need to replace entire local state with vuex?](#do-you-need-to-replace-entire-local-state-with-vuex)|
+|154| [What are vuex getters?](#what-are-vuex-getters?)|
+|155| [What is a property style access?](#what-is-a-property-style-access)|
+|156| [What is a method style access?](#what-is-a-method-style-access)|
+|157| [What is mapGetter helper?](#what-is-mapgetter-helper)|
+|158| [What are mutations?](#what-are-mutations)|
+|159| [How do you commit with payload?](#how-do-you-commit-with-payload)|
+|160| [What is object style commit?](#what-is-object-style-commit)|
+|161| [What are the caveats with vuex mutations?](#what-are-the-caveats-with-vuex-mutations)|
+|162| [Why mutations should be synchronous?](#why-mutations-should-be-synchronous)|
+|163| [How do you perform mutations in components?](#how-do-you-perform-mutations-in-components)|
+|164| [Is it mandatory to use constants for mutation types?](#is-it-mandatory-to-use-constants-for-mutation-types)|
+|165| [How do you perform asynchronous operations?](#how-do-you-perform-asynchronous-operations)|
+|166| [What are differences between mutations and actions?](#what-are-differences-between-mutations-and-actions)|
+|167| [Give an example usage of actions?](#give-an-example-usage-of-actions?)|
+|168| [How do you dispatch actions?](#how-do-you-dispatch-actions)|
+|169| [Can you dispatch an action using payload or object?](#can-you-dispatch-an-action-using-payload-or-object)|
+|170| [Can I use styled components in vuejs?](#can-i-use-styled-components-in-vuejs)|
+|171| [How do you dispatch actions in components?](#how-do-you-dispatch-actions-in-components)|
+|172| [How do you compose actions?](#how-do-you-compose-actions)|
+|173| [What are modules in vuex?](#what-are-modules-in-vuex)|
+|174| [What is module local state?](#what-is-module-local-state)|
+|175| [What is namespacing in vuex](#what-is-namespacing-in-vuex)|
+|176| [What is the default namespace behavior in vuex?](#what-is-the-default-namespace-behavior-in-vuex)|
+|177| [When do you reuse modules?](#when-do-you-reuse-modules)|
 
 1.  ### What is VueJS?
     **Vue.js** is an open-source, progressive Javascript framework for building user interfaces that aim to be incrementally adoptable. The core library of VueJS is focused on the `view layer` only, and is easy to pick up and integrate with other libraries or existing projects.
@@ -2437,7 +2483,721 @@ List VueJS Questions & Answers
      3. Asynchronous logic should be encapsulated in, and can be composed with actions.
      The project structure for any non-trivial application would be as below,
      <img src="https://github.com/sudheerj/vuejs-interview-questions/blob/master/images/vuex-app-structure.png" width="700" height="500">
+133. ### Is Vuex supports hot reloading?
+     Yes, Vuex supports hot-reloading for mutations, modules, actions and getters during development. You need to use either webpack's hot module replacement API or browserify's hot module replacement plugin.
+134. ### What is the purpose of hotUpdate API of vuex store?
+     The store.hotUpdate() API method is used for mutations and modules. For example, you need to configure vuex store as below,
+     ```javascript
+     // store.js
+     import Vue from 'vue'
+     import Vuex from 'vuex'
+     import mutations from './mutations'
+     import myModule from './modules/myModule'
 
+     Vue.use(Vuex)
+
+     const state = { message: "Welcome to hot reloading" }
+
+     const store = new Vuex.Store({
+       state,
+       mutations,
+       modules: {
+         moduleA: myModule
+       }
+     })
+
+     if (module.hot) {
+       // accept actions and mutations as hot modules
+       module.hot.accept(['./mutations', './modules/newMyModule'], () => {
+         // Get the updated modules
+         const newMutations = require('./mutations').default
+         const newMyModule = require('./modules/myModule').default
+         //swap in the new modules and mutations
+         store.hotUpdate({
+           mutations: newMutations,
+           modules: {
+             moduleA: newMyModule
+           }
+         })
+       })
+     }
+     ```
+135. ### How do you test mutations?
+     Since mutations are just functions that completely rely on their arguments it will be easier to test. You need to keep mutations inside your store.js file and should also export the mutations as a named export apart from default export.
+     Let's take an example of increment mutations,
+     ```javascript
+     // mutations.js
+     export const mutations = {
+       increment: state => state.counter++
+     }
+     ```
+     And test them using mocha and chai as below,
+     ```javascript
+     // mutations.spec.js
+     import { expect } from 'chai'
+     import { mutations } from './store'
+
+     // destructure assign `mutations`
+     const { increment } = mutations
+
+     describe('mutations', () => {
+       it('INCREMENT', () => {
+         // mock state
+         const state = { counter: 10 }
+         // apply mutation
+         increment(state)
+         // assert result
+         expect(state.counter).to.equal(11)
+       })
+     })
+     ```
+136. ### How do you test your getters?
+     It is easier to test getters similar to mutations. It is recommended to test these getters if they have complicated computation.
+     Let's take a simple todo filter as a getter
+     ```javascript
+     // getters.js
+     export const getters = {
+       filterTodos (state, status) {
+         return state.todos.filter(todo => {
+           return todo.status === status
+         })
+       }
+     }
+     ```
+     And the test case for above getter as follows,
+     ```javascript
+     // getters.spec.js
+     import { expect } from 'chai'
+     import { getters } from './getters'
+
+     describe('getters', () => {
+       it('filteredTodos', () => {
+         // mock state
+         const state = {
+           todos: [
+             { id: 1, title: 'design', status: 'Completed' },
+             { id: 2, title: 'testing', status: 'InProgress' },
+             { id: 3, title: 'development', status: 'Completed' }
+           ]
+         }
+         // mock getter
+         const filterStatus = 'Completed'
+
+         // get the result from the getter
+         const result = getters.filterTodos(state, filterStatus)
+
+         // assert the result
+         expect(result).to.deep.equal([
+           { id: 1, title: 'design', status: 'Completed' },
+           { id: 2, title: 'development', status: 'Completed' }
+         ])
+       })
+     })
+     ```
+137. ### What is the procedure to run tests in node?
+     By proper mocking, you can bundle tests with webpack and run them on node without having depenceny on Browser API.  It involves 2 steps,
+     1. **Create webpack config:** Create webpack config with proper .babelrc
+     ```javscript
+     // webpack.config.js
+     module.exports = {
+       entry: './test.js',
+       output: {
+         path: __dirname,
+         filename: 'test-bundle.js'
+       },
+       module: {
+         loaders: [
+           {
+             test: /\.js$/,
+             loader: 'babel-loader',
+             exclude: /node_modules/
+           }
+         ]
+       }
+     }
+     ```
+     2. ** Run testcases:** First you need to bundle and then run them using mocha as below,
+     ```javascript
+     webpack
+     mocha test-bundle.js
+     ```
+138. ### What is the procedure to run tests in browser?
+     Below are the steps to run tests in real browser,
+     1. Install `mocha-loader`.
+     2. Configure webpack config entry point to 'mocha-loader!babel-loader!./test.js'.
+     3. Start webpack-dev-server using the config.
+     4. Go to localhost:8080/webpack-dev-server/test-bundle to see the test result
+139. ### What is the purpose of strict mode in vuex?
+     In strict mode, whenever Vuex state is mutated outside of mutation handlers, an error will be thrown. It make sure that all state mutations can be explicitly tracked by debugging tools. You can just enable this by passing `strict: true` while creating the vuex store.
+     ```javascript
+     const store = new Vuex.Store({
+       // ...
+       strict: true
+     })
+     ```
+140. ### Can I use strict mode in production environment?
+     No, it is not recommended to use strict mode in production environment. Strict mode runs a synchronous deep watcher on the state tree for detecting inappropriate mutations and it can be quite expensive when you perform large amount of mutations. i.e, It can impact performance if you enable in production mode.
+     Hence it should be handled through build tools,
+     ```javascript
+     const store = new Vuex.Store({
+       // ...
+       strict: process.env.NODE_ENV !== 'production'
+     })
+     ```
+141. ### What is vuex plugin?
+     The vuex plugin is an option hat exposes hooks for each mutation. It is a normal function that receives the store as the only argument. You can create your own plugin or use built-in plugins.
+     The plugin skeleton would be as below,
+     ```javascript
+     const myPlugin = store => {
+       // called when the store is initialized
+       store.subscribe((mutation, state) => {
+         // called after every mutation.
+         // The mutation comes in the format of `{ type, payload }`.
+       })
+     }
+     ```
+     After that plugin can be configured for plugins options as below,
+     ```javascript
+     const store = new Vuex.Store({
+       // ...
+       plugins: [myPlugin]
+     })
+     ```
+142. ### How do you mutate state in plugins?
+     Similar to components you can't mutate state directly but they can trigger changes by by committing mutations. This way a plugin can be used to sync a data source to the store.
+     For example, createWebSocketPlugin plugin is used to sync a websocket data source to the store.
+     ```javascript
+     export default function createWebSocketPlugin (socket) {
+       return store => {
+         socket.on('data', data => {
+           store.commit('receiveData', data)
+         })
+         store.subscribe(mutation => {
+           if (mutation.type === 'UPDATE_DATA') {
+             socket.emit('update', mutation.payload)
+           }
+         })
+       }
+     }
+     ```
+     And then configure plugin in vuex store as below
+     ```javascript
+     const plugin = createWebSocketPlugin(socket)
+
+     const store = new Vuex.Store({
+       state,
+       mutations,
+       plugins: [plugin]
+     })
+     ```
+143. ### What is vuex store?
+     A Vuex "store" is basically a container that holds your application state. The store creation is pretty straightforward.
+     Below are the list of instructions to use vuex in an increment application,
+     1. Configure vuex in vuejs ecosystem
+     ```javascript
+     import Vuex from "vuex";
+     Vue.use(Vuex)
+     ```
+     2. Provide an initial state object and some mutations
+     ```javascript
+     // Make sure to call Vue.use(Vuex) first if using a module system
+
+     const store = new Vuex.Store({
+       state: {
+         count: 0
+       },
+       mutations: {
+         increment (state) {
+           state.count++
+         }
+       }
+     })
+     ```
+     3. Trigger state change with commit and access state variables,
+     ```javascript
+     store.commit('increment')
+
+     console.log(store.state.count) // -> 1
+     ```
+144. ### What are the differences of vuex store and plain global object?
+     Below are the two major differences between vuex store and plain global object
+     1. **Vuex stores are reactive:** If the store's state changes then vue components will reactively and efficiently get updated
+     2. **Cannot directly mutate the store's state:** The store's state is changed by explicitly committing mutations to ensure that every state change leaves a track-able record for tooling purpose
+145. ### What is the reason not to update the state directly?
+     We want to explicitly track application state in order to implement tools that can log every mutation, take state snapshots, or even perform time travel debugging. So we need to commit a mutation instead of changing store's state directly.
+146. ### What is Single state tree?
+     Vuex's single state tree is single object contains all your application level state and serves as the "single source of truth". It  does not conflict with modularity when you split state and mutations into sub modules.
+147. ### How do you install vuex?
+     You can install vuex using npm or yarn as below,
+     ```javascript
+     npm install vuex --save
+     (or)
+     yarn add vuex
+     ```
+     In a module system, you must explicitly install Vuex via Vue.use()
+     ```javascript
+     import Vue from 'vue'
+     import Vuex from 'vuex'
+
+     Vue.use(Vuex)
+     ```
+     (OR)
+     You can also install it using CDN links such as unpkg.cpm which provides NPM-based CDN links. Just include vuex after Vue and it will install itself automatically.
+     ```javascript
+     <script src="https://unpkg.com/vue.js"></script>
+     <script src="https://unpkg.com/vuex.js"></script>
+     ```
+     **Note:** You can  use a specific version/tag via URLs like https://unpkg.com/vuex@2.0.0. If you don't mention any version then it will point to latest version.
+148. ### Do I need promise for vuex?
+     Yes, Vuex requires Promise. If your supporting browsers do not implement Promise (e.g. IE), you can use a polyfill library, such as es6-promise using npm or yarn.
+     ```javascript
+     npm install es6-promise --save # NPM
+     yarn add es6-promise # Yarn
+     ```
+     After that import into anywhere in your application,
+     ```javascript
+     import 'es6-promise/auto'
+     ```
+149. ### How do you display store state in vue components?
+     Since Vuex stores are reactive, you can retrieve" state from store by simply returning store's state from within a computed property. i.e, Whenever store state changes, it will cause the computed property to re-evaluate, and trigger associated DOM updates.
+     Let's take a hello word component which display store's state in the template,
+     ```javascript
+     // let's create a hello world component
+     const Greeting = {
+       template: `<div>{{ greet }}</div>`,
+       computed: {
+         greet () {
+           return store.state.msg
+         }
+       }
+     }
+     ```
+150. ### How do you inject store into child components?
+     Vuex provides a mechanism to "inject" the store into all child components from the root component with the store option. It will be enabled by vue.use(vuex).
+     For example, let's inject into our app component as below,
+     ```javascript
+     const app = new Vue({
+       el: '#app',
+       // provide the store using the "store" option.
+       // this will inject the store instance to all child components.
+       store,
+       components: { Greeting },
+       template: `
+         <div class="app">
+           <greeting></greeting>
+         </div>
+       `
+     })
+     ```
+     Now the store will be injected into all child components of the root and will be available on them as **this.$store**
+     ```javascript
+      // let's create a hello world component
+          const Greeting = {
+            template: `<div>{{ greet }}</div>`,
+            computed: {
+              greet () {
+                return this.$store.state.msg
+              }
+            }
+          }
+     ```
+151. ### What is mapState helper?
+     In Vuex application, creating a computed property every time whenever we want to access the store's state property or getter is going to be repetitive and verbose, especially if a component needs more than one state property. In this case, we can make use of the mapState helper of vuex which generates computed getter functions for us.
+     Let's take an increment example to demonstrate mapState helper,
+     ```javascript
+     // in full builds helpers are exposed as Vuex.mapState
+     import { mapState } from 'vuex'
+
+     export default {
+       // ...
+       computed: mapState({
+         // arrow functions can make the code very succinct!
+         username: state => state.username,
+
+         // passing the string value 'username' is same as `state => state.username`
+         usernameAlias: 'username',
+
+         // to access local state with `this`, a normal function must be used
+          greeting (state) {
+           return this.localTitle + state.username
+         }
+       })
+     }
+     ```
+     We can also pass a string array to mapState when the name of a mapped computed property is the same as a state sub tree name
+     ```javascript
+     computed: mapState([
+       // map this.username to store.state.username
+       'username'
+     ])
+     ```
+152. ### How do you combine local computed properties with mapState helper?
+     You can use object spread operator syntax in order to combine mapState helper(which returns an object) with other local computed properties. This way it simplify merging techniques using utilities.
+     ```javascript
+     computed: {
+       localComputed () { /* ... */ },
+       // mix this into the outer object with the object spread operator
+       ...mapState({
+         // ...
+       })
+     }
+     ```
+153. ### Do you need to replace entire local state with vuex?
+     No, if a piece of state strictly belongs to a single component, it could be just fine leaving it as local state. i.e, Eventhough vuex used in the application, it doesn't mean that you need to keep all the local state in vuex store. Other the code becomes more verbose and indirect although it makes your state mutations more explicit and debuggable.
+154. ### What are vuex getters??
+     Vuex getters acts as computed properties for stores to compute derived state based on store state. Similar to computed properties, a getter's result is cached based on its dependencies, and will only re-evaluate when some of its dependencies have changed.
+     Let's take a todo example which as completedTodos getter to find all completed todos,
+     ```javascript
+     const store = new Vuex.Store({
+       state: {
+         todos: [
+           { id: 1, text: 'Vue course', completed: true },
+           { id: 2, text: 'Vuex course', completed: false },
+           { id: 2, text: 'Vue Router course', completed: true }
+         ]
+       },
+       getters: {
+         completedTodos: state => {
+           return state.todos.filter(todo => todo.completed)
+         }
+       }
+     })
+     ```
+     **Note:**Getters receive state as first argument.
+155. ### What is a property style access?
+     You can access values of store's getter object(store.getters) as properties. This is known as property style access.
+     For example, you can access todo's status as a property,
+     ```javascript
+     store.getters.todosStatus
+     ```
+     The getters can be passed as 2nd argument for other getters. For example, you can derive completed todo's count based on their status as below,
+     ```javascript
+     getters: {
+       completedTodosCount: (state, getters) => {
+         return getters.todosStatus === 'completed'
+       }
+     }
+     ```
+     **Note:** The getters accessed as properties are cached as part of Vue's reactivity system.
+156. ### What is a method style access?
+     You can access store's state in a method style by passing arguments. For example, you can pass user id to find user profile information as below,
+     ```javascript
+     getters: {
+       getUserProfileById: (state) => (id) => {
+         return state.users.find(user => user.id === id)
+       }
+     }
+     ```
+     After that you can access it as a method call,
+     ```javascript
+     store.getters.getUserProfileById(111); {id: '111', name: 'John', age: 33}
+     ```
+157. ### What is mapGetter helper??
+     The mapGetters is a helper that simply maps store getters to local computed properties. For example, the usage of getters for todo app would be as below,
+     ```javascript
+     import { mapGetters } from 'vuex'
+
+     export default {
+       computed: {
+         // mix the getters into computed with object spread operator
+         ...mapGetters([
+           'completedTodos',
+           'todosCount',
+           // ...
+         ])
+       }
+     }
+     ```
+158. ### What are mutations?
+     Vuex mutations are similar to any events with a string `type` and a `handler`. The handler function is where we perform actual state modifications, and it will receive the state as the first argument.
+     For example, the counter example with increment mutation would be as below,
+     ```javascript
+     const store = new Vuex.Store({
+       state: {
+         count: 0
+       },
+       mutations: {
+         increment (state) {
+           // mutate state
+           state.count++
+         }
+       }
+     })
+     ```
+     You can't directly invoke mutation instead you need to call `store.commit` with its type. The above mutation would be triggered as folows
+     ```javascript
+     store.commit('increment')
+     ```
+159. ### How do you commit with payload?
+     You can also pass **payload** for the mutation as an additional argument to `store.commit`. For example, the counter mutation with payload object would be as below,
+     ```javascript
+     mutations: {
+       increment (state, payload) {
+         state.count += payload.increment
+       }
+     }
+     ```
+     And then you can trigger increment commit
+     ```javascript
+     store.commit('increment', {
+       increment: 20
+     })
+     ```
+     **Note:** You can also pass primitives as payload.
+160. ### What is object style commit?
+     You can also commit a mutation is by directly using an object that has a **type** property.
+     ```javascript
+     store.commit({
+       type: 'increment',
+       value: 20
+     })
+     ```
+     Now the entire object will be passed as the payload to mutation handlers(i.e, without any changes to handler signature).
+     ```javascript
+     mutations: {
+       increment (state, payload) {
+         state.count += payload.value
+       }
+     }
+     ```
+161. ### What are the caveats with vuex mutations?
+     Since a Vuex store's state is made reactive by Vue, the same reactivity caveats of vue will apply to vuex mutations. These are the rules should be followed for vuex mutations,
+     1. It is recommended to initialize store's initial state with all desired fields upfront
+     2. Add new properties to state Object either by set method or object spread syntax
+     ```javascript
+     Vue.set(stateObject, 'newProperty', 'John')
+     ```
+     (OR)
+     ```javascript
+     state.stateObject = { ...state.stateObject, newProperty: 'John' }
+     ```
+162. ### Why mutations should be synchronous?
+     You need to remember that mutation handler functions must be synchronous. This is why because any state mutation performed in the callback is essentially un-trackable. It is going to be problematic when the devtool will need to capture a "before" and "after" snapshots of the state during the mutations.
+     ```javascript
+     mutations: {
+       someMutation (state) {
+         api.callAsyncMethod(() => {
+           state.count++
+         })
+       }
+     }
+     ```
+163. ### How do you perform mutations in components?
+     You can commit mutations in components with  either **this.$store.commit('mutation name')** or mapMutations helper to map component methods to **store.commit** calls.
+     For example, the usage of mapMutations helper on counter example would be as below,
+     ```javascript
+     import { mapMutations } from 'vuex'
+
+     export default {
+       methods: {
+         ...mapMutations([
+           'increment', // map `this.increment()` to `this.$store.commit('increment')`
+
+           // `mapMutations` also supports payloads:
+           'incrementBy' // map `this.incrementBy(amount)` to `this.$store.commit('incrementBy', amount)`
+         ]),
+         ...mapMutations({
+           add: 'increment' // map `this.add()` to `this.$store.commit('increment')`
+         })
+       }
+     }
+     ```
+164. ### Is it mandatory to use constants for mutation types?
+     No, it is not mandatory. But you might observed that State management implementations such Flux and Redux use constants for mutation types. This convention is just a preference and useful to take advantage of tooling like linters, and putting all constants in a single file allows your collaborators to get an at-a-glance view of what mutations are possible in the entire application.
+     For example, the mutations can be declared as below,
+     ```javascript
+     // mutation-types.js
+     export const SOME_MUTATION = 'SOME_MUTATION'
+     ```
+     And you can configure them in store as follows,
+     ```javascript
+     // store.js
+     import Vuex from 'vuex'
+     import { SOME_MUTATION } from './mutation-types'
+
+     const store = new Vuex.Store({
+       state: { ... },
+       mutations: {
+         // ES2015 computed property name feature to use a constant as the function name
+         [SOME_MUTATION] (state) {
+           // mutate state
+         }
+       }
+     })
+     ```
+165. ### How do you perform asynchronous operations?
+     In Vuex, mutations are synchronous transactions. But if you want to handle asynchronous operations then you should use **actions**.
+166. ### What are differences between mutations and actions?
+     Actions are similar to mutations, but there are two main differences,
+     1. Mutations perform mutations on the state, actions commit mutations.
+     2. Actions can contain arbitrary asynchronous operations unlike mutations.
+167. ### Give an example usage of actions?
+     Vuex provides actions property similar mutations property in order to define action handlers. These action handlers receive context object as an argument which has same properties and methods of store instance.
+     Let's see counter example to demonstrate increment action which commits respective mutation,
+     ```javascript
+     const store = new Vuex.Store({
+       state: {
+         count: 0
+       },
+       mutations: {
+         increment (state) {
+           state.count++
+         }
+       },
+       actions: {
+         increment (context) {
+           context.commit('increment')
+         }
+       }
+     })
+     ```
+168. ### How do you dispatch actions?
+     Actions are simply triggered with the store.dispatch method as below,
+     ```javascript
+     store.dispatch('increment')
+     ```
+169. ### Can you dispatch an action using payload or object style?
+     Yes, actions support both payload and object style format similar to mutations.
+     ```javascript
+     // dispatch with a payload
+     store.dispatch('incrementAsync', {
+       amount: 10
+     })
+
+     // dispatch with an object
+     store.dispatch({
+       type: 'incrementAsync',
+       amount: 10
+     })
+     ```
+170. ### Can I use styled components in vuejs?
+     Styled components is basically used for ReactJS applications. If you want to use for VueJS applications, there is vuejs styled components library available under styled component library. VueJS Styled component is a javascript library for stying vuejs applications.
+171. ### How do you dispatch actions in components?
+     You can dispatch actions in components with **this.$store.dispatch('action name')**, or use the **mapActions** helper which maps component methods to store.dispatch calls.
+     For example, you can dispatch increment actions in counter component as below,
+     ```javascript
+     import { mapActions } from 'vuex'
+
+     export default {
+       // ...
+       methods: {
+         ...mapActions([
+           'increment', // map `this.increment()` to `this.$store.dispatch('increment')`
+
+           // `mapActions` also supports payloads:
+           'incrementBy' // map `this.incrementBy(amount)` to `this.$store.dispatch('incrementBy', amount)`
+         ]),
+         ...mapActions({
+           add: 'increment' // map `this.add()` to `this.$store.dispatch('increment')`
+         })
+       }
+     }
+     ```
+172. ### How do you compose actions?
+     You can write multiple actions together to handle more complex async flows either by chaining promises or async/await. i.e, `store.dispatch` can handle Promise returned by the triggered action handler and it also returns Promise.
+     Let's take two actions to see how they are combined and handled async flows,
+     ```javascript
+     actions: {
+       actionOne ({ commit }) {
+         return new Promise((resolve, reject) => {
+           setTimeout(() => {
+             commit('first mutation')
+             resolve()
+           }, 1000)
+         })
+       },
+       actionTwo ({ dispatch, commit }) {
+         return dispatch('actionA').then(() => {
+           commit('second mutation')
+         })
+       }
+     }
+     ```
+     As per the above example, When you try to dispatch actionTwo it dispatchs actionOne first and then commits respective mutation. You can still simplify with async/await as below,
+     ```javascript
+     actions: {
+       async actionOne ({ commit }) {
+         commit('first mutation', await getDataAsPromise())
+       },
+       async actionTwo ({ dispatch, commit }) {
+         await dispatch('actionOne') // wait for `actionA` to finish
+         commit('second mutation', await getSomeDataAsPromise())
+       }
+     }
+     ```
+173. ### What are modules in vuex?
+     If you keep all state of our application in a single big state, the store can get really bloated. To solve this problem, Vuex allows us to divide our store into modules. Here, each module can contain its own state, mutations, actions, getters, and even nested modules.
+     Let's take an example with multiple modules, configuring them in vuex and accessing different modules,
+     ```javascript
+     const moduleOne = {
+       state: { ... },
+       mutations: { ... },
+       actions: { ... },
+       getters: { ... }
+     }
+
+     const moduleTwo = {
+       state: { ... },
+       mutations: { ... },
+       actions: { ... },
+       getters: { ... }
+     }
+
+     const store = new Vuex.Store({
+       modules: {
+         one: moduleOne,
+         two: moduleTwo
+       }
+     })
+
+     store.state.one // -> `moduleOne's state
+     store.state.one // -> `moduleTwo's state
+     ```
+174. ### What is module local state?
+     When you use modules the local state will be available to mutations, getters and actions in different ways.
+     1. Both mutations and getters will receive module local state as first argument.
+     ```javascript
+     const moduleOne = {
+       state: { count: 0 },
+       mutations: {
+         increment (state) {
+           state.count++; // Here state refers local module state
+         }
+       },
+
+       getters: {
+         average (state) {
+           return state.count / 2
+         }
+       }
+     }
+     ```
+     2. In actions, local state will be available as first argument.
+     ```javascript
+     const moduleOne = {
+       actions: {
+         incrementConditional ({ state, commit, rootState }) {
+           if (state.count < rootState.count) {
+             commit('increment')
+           }
+         }
+       }
+     }
+     ```
+175. ### What is namespacing in vuex?
+176. ### What is the default namespace behavior in vuex?
+     By default, actions, mutations and getters inside modules are still registered under the global namespace. Because of that multiple modules react to the same mutation/action type.
+177. ### When do you reuse modules?
+     Sometime you may need to create multiple instances of a module. For example, it is needed in the below cases,
+     1. If multiple stores that use the same module
+     2. Register the same module multiple times in the same store.
+     In those cases, you need to assign to a variable and export it for reusability,
+     ```javascript
+     const MyReusableModule = {
+       // state
+       // mutations, actions, getters...
+     }
+     ```
 
 ## References 
  
